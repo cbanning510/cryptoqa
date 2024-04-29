@@ -1,0 +1,17 @@
+diff --git a/node_modules/react-native-gifted-chat/lib/MessageContainer.js b/node_modules/react-native-gifted-chat/lib/MessageContainer.js
+index 6bdf6da..17ea81b 100644
+--- a/node_modules/react-native-gifted-chat/lib/MessageContainer.js
++++ b/node_modules/react-native-gifted-chat/lib/MessageContainer.js
+@@ -55,9 +55,9 @@ export default class MessageContainer extends React.PureComponent {
+             hasScrolled: false,
+         };
+         this.renderTypingIndicator = () => {
+-            if (Platform.OS === 'web') {
+-                return null;
+-            }
++            // if (Platform.OS === 'web') {
++            //     return null;
++            // }
+             return <TypingIndicator isTyping={this.props.isTyping || false}/>;
+         };
+         this.renderFooter = () => {
