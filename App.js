@@ -2,13 +2,17 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import ChatComponent from "./ChatComponent";
 import Header from "./Header";
+import { Provider } from "react-redux";
+import { store } from "./store";
 
 const App = () => {
   return (
-    <View style={styles.box1}>
-      <Header />
-      <ChatComponent />
-    </View>
+    <Provider store={store}>
+      <View style={styles.box1}>
+        <Header />
+        <ChatComponent />
+      </View>
+    </Provider>
   );
 };
 
