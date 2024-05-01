@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { TouchableOpacity, View, Platform } from "react-native";
+import { TouchableOpacity, View, Platform, Linking } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import {
   GiftedChat,
@@ -24,7 +24,7 @@ const ChatComponent = () => {
   const [messages, setMessages] = useState([
     {
       _id: Math.round(Math.random() * 1000000).toString(),
-      text: "Hello, I'm your AI survival assistant. Ask me anything.",
+      text: "Ask me anything about xcoin and I'll be able to answer anything you need.",
       createdAt: new Date().getTime(),
       user: {
         _id: "2",
@@ -50,7 +50,7 @@ const ChatComponent = () => {
         }, 50);
       }
     }
-    console.log("ChatComponent mounted", messages);
+    // console.log("ChatComponent mounted", messages);
   }, []);
 
   useEffect(() => {
@@ -162,8 +162,8 @@ const ChatComponent = () => {
 
         try {
           const response = await fetch(
-            // "http://ec2-3-82-165-10.compute-1.amazonaws.com:3001/openai/message",
-            "http://192.168.1.151:3001/openai/message",
+            "http://ec2-3-82-165-10.compute-1.amazonaws.com:3001/openai/message",
+            // "http://192.168.1.151:3001/openai/message",
             {
               method: "POST",
               headers: {
@@ -364,7 +364,18 @@ const ChatComponent = () => {
               alignSelf: "center",
             }}
             // onPress={handleImagePicker}
-            onPress={() => alert("Image Picker")}
+            onPress={() => {
+              const url = "https://www.google.com";
+              Linking.canOpenURL(url)
+                .then((supported) => {
+                  if (supported) {
+                    Linking.openURL(url);
+                  } else {
+                    console.log("Don't know how to open URI: " + url);
+                  }
+                })
+                .catch((err) => console.error("An error occurred", err));
+            }}
           >
             <View>
               <MaterialIcons name="file-upload" size={34} color="white" />

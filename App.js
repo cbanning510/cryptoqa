@@ -19,7 +19,7 @@ const App = () => {
 const styles = StyleSheet.create({
   box1: {
     flex: 1,
-    padding: 40,
+    paddingBottom: 40,
     justifyContent: "center",
     alignContent: "center",
     backgroundColor: "#151515",

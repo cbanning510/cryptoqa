@@ -6,7 +6,7 @@ export const chatSlice = createSlice({
     messages: [
       {
         _id: Math.round(Math.random() * 1000000).toString(),
-        text: "Hello, I'm your AI survival assistant. Ask me anything.",
+        text: "Ask me anything about xcoin and I'll be able to answer anything you need.",
         createdAt: new Date().getTime(),
         user: {
           _id: "2",
