@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { TouchableOpacity, View, Platform, Linking } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -19,6 +19,7 @@ import {
 } from "./chatSlice";
 
 const ChatComponent = () => {
+  const chatRef = useRef(null);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState([
@@ -196,6 +197,10 @@ const ChatComponent = () => {
           };
           //   dispatch(addMessage(botMessage));
           dispatchMessageWithDelay(botMessage);
+          chatRef.current?.scrollToOffset({
+            offset: 0,
+            animated: true,
+          });
           resetStates();
         } catch (error) {
           console.error("Error:", error);
@@ -339,7 +344,9 @@ const ChatComponent = () => {
         renderAvatar={null}
         renderTime={renderTime}
         // renderFooter={() => (isLoading ? <TypingIndicator /> : null)}
-        scrollToBottom
+        messageContainerRef={chatRef}
+        infiniteScroll
+        // loadEarlier
         bottomOffset={100}
         renderAvatarOnTop
         // messages={parseAndCleanInput(globalMessages)}
