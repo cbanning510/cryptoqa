@@ -184,8 +184,8 @@ const ChatComponent = () => {
 
         try {
           const response = await fetch(
-            // "http://ec2-44-202-254-222.compute-1.amazonaws.com:3001/openai/message",
-            "http://192.168.1.151:3001/openai/message",
+            "http://ec2-44-202-254-222.compute-1.amazonaws.com:3001/openai/message",
+            // "http://192.168.1.151:3001/openai/message",
             {
               method: "POST",
               headers: {
