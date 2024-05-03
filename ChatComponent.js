@@ -1,6 +1,14 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { TouchableOpacity, View, Platform, Linking } from "react-native";
+import {
+  TouchableOpacity,
+  StyleSheet,
+  View,
+  Platform,
+  Linking,
+  Dimensions,
+} from "react-native";
 import { useSelector, useDispatch } from "react-redux";
+import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 import {
   GiftedChat,
   Bubble,
@@ -19,6 +27,14 @@ import {
 } from "./chatSlice";
 
 const ChatComponent = () => {
+  const { width } = Dimensions.get("window"); // Get the screen width
+  //   console.log("Dimensions are: ", Dimensions.get("window"));
+  console.log("Width is: ", width); // Log the width to the console
+  const chatContainerStyle = {
+    flex: 1,
+    // backgroundColor: "#fff",
+    paddingHorizontal: width > 768 ? 350 : 0, // Use the width directly here
+  };
   const chatRef = useRef(null);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
@@ -348,118 +364,130 @@ const ChatComponent = () => {
 
   return (
     <>
-      <GiftedChat
-        renderAvatar={null}
-        renderTime={renderTime}
-        // renderFooter={() => (isLoading ? <TypingIndicator /> : null)}
-        messageContainerRef={chatRef}
-        infiniteScroll
-        // loadEarlier
-        bottomOffset={100}
-        renderAvatarOnTop
-        // messages={parseAndCleanInput(globalMessages)}
-        messages={globalMessages}
-        onSend={(newMessages) => onSend(newMessages)}
-        renderBubble={renderBubble}
-        user={{
-          _id: 1,
-        }}
-        messagesContainerStyle={{
-          paddingBottom: 40,
-          // backgroundColor: "#151515",
-        }}
-        inverted={false}
-        isTyping={isLoading}
-        // isTyping={true}
-        renderActions={() => (
-          <TouchableOpacity
-            style={{
-              marginRight: 16,
-              marginTop: 8,
-              alignSelf: "center",
-            }}
-            // onPress={handleImagePicker}
-            onPress={() => {
-              const url = "https://www.google.com";
-              Linking.canOpenURL(url)
-                .then((supported) => {
-                  if (supported) {
-                    Linking.openURL(url);
-                  } else {
-                    console.log("Don't know how to open URI: " + url);
-                  }
-                })
-                .catch((err) => console.error("An error occurred", err));
-            }}
-          >
-            <View>
-              <MaterialIcons name="file-upload" size={34} color="white" />
-            </View>
-          </TouchableOpacity>
-        )}
-        renderSend={(props) => {
-          return (
+      <View style={chatContainerStyle}>
+        <GiftedChat
+          renderAvatar={null}
+          renderTime={renderTime}
+          // renderFooter={() => (isLoading ? <TypingIndicator /> : null)}
+          messageContainerRef={chatRef}
+          infiniteScroll
+          // loadEarlier
+          bottomOffset={100}
+          renderAvatarOnTop
+          // messages={parseAndCleanInput(globalMessages)}
+          messages={globalMessages}
+          onSend={(newMessages) => onSend(newMessages)}
+          renderBubble={renderBubble}
+          user={{
+            _id: 1,
+          }}
+          messagesContainerStyle={{
+            paddingBottom: 40,
+            // backgroundColor: "#151515",
+          }}
+          inverted={false}
+          isTyping={isLoading}
+          // isTyping={true}
+          renderActions={() => (
             <TouchableOpacity
               style={{
-                marginRight: 14,
-                padding: 12,
-                position: "absolute",
-                right: -4,
-                top: 9,
+                marginRight: 16,
+                marginTop: 8,
+                alignSelf: "center",
               }}
+              // onPress={handleImagePicker}
               onPress={() => {
-                if (props.text && props.onSend) {
-                  props.onSend({ text: props.text.trim() }, true);
-                }
+                const url = "https://www.google.com";
+                Linking.canOpenURL(url)
+                  .then((supported) => {
+                    if (supported) {
+                      Linking.openURL(url);
+                    } else {
+                      console.log("Don't know how to open URI: " + url);
+                    }
+                  })
+                  .catch((err) => console.error("An error occurred", err));
               }}
             >
-              {props.text ? (
-                <Send width={24} height={24} />
-              ) : (
-                <SendDisabled width={24} height={24} />
-              )}
+              <View>
+                <MaterialIcons name="file-upload" size={34} color="white" />
+              </View>
             </TouchableOpacity>
-          );
-        }}
-        textInputProps={{
-          multiline: false,
-          style: {
-            flex: 1,
-            alignSelf: "center",
-            marginTop: 8,
-            //width: "64%",
-            height: 48,
-            borderColor: "#202428",
-            borderWidth: 2,
-            borderRadius: 100,
-            paddingRight: 64,
-            paddingLeft: 20,
-            fontSize: 15,
-            color: "rgba(255, 255, 255, 0.6)",
-            //fontFamily: "SF Pro Text",
-            backgroundColor: "#131612",
-          },
-          placeholder: "Message...",
-          placeholderTextColor: "rgba(255, 255, 255, 0.45)",
-        }}
-        renderInputToolbar={(props) => {
-          return (
-            <InputToolbar
-              {...props}
-              containerStyle={{
-                // width: "80%",
-                flex: 1,
-                paddingHorizontal: 24,
-                paddingLeft: 27,
-                backgroundColor: "#131612",
-                borderTopWidth: 0,
-              }}
-            />
-          );
-        }}
-      />
+          )}
+          renderSend={(props) => {
+            return (
+              <TouchableOpacity
+                style={{
+                  marginRight: 14,
+                  padding: 12,
+                  position: "absolute",
+                  right: -4,
+                  top: 9,
+                }}
+                onPress={() => {
+                  if (props.text && props.onSend) {
+                    props.onSend({ text: props.text.trim() }, true);
+                  }
+                }}
+              >
+                {props.text ? (
+                  <Send width={24} height={24} />
+                ) : (
+                  <SendDisabled width={24} height={24} />
+                )}
+              </TouchableOpacity>
+            );
+          }}
+          textInputProps={{
+            multiline: false,
+            style: {
+              flex: 1,
+              alignSelf: "center",
+              marginTop: 8,
+              //width: "64%",
+              height: 48,
+              borderColor: "#202428",
+              borderWidth: 2,
+              borderRadius: 100,
+              paddingRight: 64,
+              paddingLeft: 20,
+              fontSize: 15,
+              color: "rgba(255, 255, 255, 0.6)",
+              //fontFamily: "SF Pro Text",
+              backgroundColor: "#131612",
+            },
+            placeholder: "Message...",
+            placeholderTextColor: "rgba(255, 255, 255, 0.45)",
+          }}
+          renderInputToolbar={(props) => {
+            return (
+              <InputToolbar
+                {...props}
+                containerStyle={{
+                  // width: "80%",
+                  flex: 1,
+                  paddingHorizontal: 24,
+                  paddingLeft: 27,
+                  backgroundColor: "#131612",
+                  borderTopWidth: 0,
+                }}
+              />
+            );
+          }}
+        />
+      </View>
     </>
   );
 };
+
+// const styles = StyleSheet.create({
+//   chatContainer: {
+//     flex: 1,
+//     backgroundColor: "#fff",
+//     // Apply padding conditionally based on the screen width
+//     paddingHorizontal: width > 768 ? 150 : 10,
+//   },
+//   // Other styles...
+// });
 
 export default ChatComponent;
