@@ -160,6 +160,10 @@ const ChatComponent = () => {
           createdAt: userMessageCreatedAt,
         };
         dispatch(addMessage(userMessage));
+        // chatRef.current?.scrollToOffset({
+        //   offset: 0,
+        //   animated: true,
+        // });
 
         try {
           const response = await fetch(
@@ -197,10 +201,10 @@ const ChatComponent = () => {
           };
           //   dispatch(addMessage(botMessage));
           dispatchMessageWithDelay(botMessage);
-          chatRef.current?.scrollToOffset({
-            offset: 0,
-            animated: true,
-          });
+          //   chatRef.current?.scrollToOffset({
+          //     offset: 0,
+          //     animated: true,
+          //   });
           resetStates();
         } catch (error) {
           console.error("Error:", error);
@@ -292,6 +296,10 @@ const ChatComponent = () => {
         };
 
         dispatch(addMessage(message));
+        // chatRef.current?.scrollToOffset({
+        //   offset: 0,
+        //   animated: true,
+        // });
         // messageReceivedSound.play();
 
         // Optionally set loading to false after the last message
