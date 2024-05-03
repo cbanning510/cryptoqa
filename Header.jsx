@@ -4,16 +4,18 @@ import {
   StyleSheet,
   TouchableOpacity,
   Linking,
+  Image,
 } from "react-native";
 import Avatar from "./Avatar";
+import Pepe from "./assets/hero-image.png";
 
 const Header = () => {
-  const avatarUri = "./assets/pepe.webp";
+  // const avatarUri = "./assets/hero-image.png";
 
   return (
     <View style={styles.header}>
       <View style={styles.leftHeaderContainer}>
-        <Avatar uri={avatarUri} />
+        <Image source={Pepe} style={{ width: 30, height: 30 }} />
         <Text style={styles.headerText}>PEPi Support</Text>
       </View>
       <TouchableOpacity

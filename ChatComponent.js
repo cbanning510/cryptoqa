@@ -6,6 +6,7 @@ import {
   Platform,
   Linking,
   Dimensions,
+  Image,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { widthPercentageToDP as wp } from "react-native-responsive-screen";
@@ -17,8 +18,8 @@ import {
   Time,
 } from "react-native-gifted-chat";
 import { MaterialIcons } from "@expo/vector-icons";
-import SendDisabled from "./assets/send-disabled.svg";
-import Send from "./assets/send.svg";
+import SendDisabled from "./assets/send-disabled.png";
+import Send from "./assets/send.png";
 import {
   addMessage,
   // setPresentLocation,
@@ -431,9 +432,12 @@ const ChatComponent = () => {
                 }}
               >
                 {props.text ? (
-                  <Send width={24} height={24} />
+                  <Image source={Send} style={{ width: 24, height: 24 }} />
                 ) : (
-                  <SendDisabled width={24} height={24} />
+                  <Image
+                    source={SendDisabled}
+                    style={{ width: 24, height: 24 }}
+                  />
                 )}
               </TouchableOpacity>
             );
