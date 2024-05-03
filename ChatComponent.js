@@ -162,8 +162,8 @@ const ChatComponent = () => {
 
         try {
           const response = await fetch(
-            "http://ec2-3-82-165-10.compute-1.amazonaws.com:3001/openai/message",
-            // "http://192.168.1.151:3001/openai/message",
+            // "http://ec2-44-202-254-222.compute-1.amazonaws.com:3001/openai/message",
+            "http://192.168.1.151:3001/openai/message",
             {
               method: "POST",
               headers: {
@@ -173,7 +173,7 @@ const ChatComponent = () => {
                 userInput: userMessage.text,
                 //lat: location?.coords.latitude,
                 //long: location?.coords.longitude,
-                dateTime: userMessage.createdAt,
+                //dateTime: userMessage.createdAt,
                 model: currentModel,
               }),
             }
