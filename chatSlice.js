@@ -6,7 +6,16 @@ export const chatSlice = createSlice({
     messages: [
       {
         _id: Math.round(Math.random() * 1000000).toString(),
-        text: "Ask me anything about PEPI tokens and I'll be able to answer anything you need.",
+        text: "Hey there! Welcome to the PEPi community support agent.",
+        createdAt: new Date().getTime(),
+        user: {
+          _id: "2",
+          name: "Bot",
+        },
+      },
+      {
+        _id: Math.round(Math.random() * 1000000).toString(),
+        text: "You can ask me anything you want about PEPi or ERC20i tokens, and I’ll do my best to answer you or point you in the right direction!",
         createdAt: new Date().getTime(),
         user: {
           _id: "2",

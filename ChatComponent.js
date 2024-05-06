@@ -184,8 +184,8 @@ const ChatComponent = () => {
 
         try {
           const response = await fetch(
-            "https://api.nofud.xyz/api/openai/message",
-            // "http://192.168.1.151:3001/openai/message",
+            // "https://api.nofud.xyz/api/openai/message",
+            "http://192.168.1.151:3001/api/openai/message",
             {
               method: "POST",
               headers: {
@@ -256,23 +256,26 @@ const ChatComponent = () => {
             backgroundColor: "#282D31CC",
             borderBottomLeftRadius: 0,
             marginBottom: 0, // Add space below each left bubble
+            maxWidth: "40%",
           },
           right: {
             backgroundColor: props.currentMessage.image
               ? // ? "#282D31CC"
                 "transparent"
-              : "#34baeb",
+              : "#1186FF",
             borderBottomRightRadius: props.currentMessage.image ? null : 0,
             marginBottom: 0, // Add space below each right bubble
+            maxWidth: "40%",
           },
         }}
         textStyle={{
           left: { color: "white" },
-          right: { color: "black" },
+          right: { color: "white" },
         }}
         timeTextStyle={{
           right: {
-            color: "grey",
+            color: "lightgrey",
+            // color: "white",
           },
         }}
       />
@@ -384,7 +387,7 @@ const ChatComponent = () => {
           }}
           messagesContainerStyle={{
             paddingBottom: 40,
-            // backgroundColor: "#151515",
+            backgroundColor: "#151515",
           }}
           inverted={false}
           isTyping={isLoading}
@@ -458,7 +461,7 @@ const ChatComponent = () => {
               fontSize: 15,
               color: "rgba(255, 255, 255, 0.6)",
               //fontFamily: "SF Pro Text",
-              backgroundColor: "#131612",
+              backgroundColor: "#151515",
             },
             placeholder: "Message...",
             placeholderTextColor: "rgba(255, 255, 255, 0.45)",
@@ -467,12 +470,19 @@ const ChatComponent = () => {
             return (
               <InputToolbar
                 {...props}
+                textInputProps={{
+                  ...props.textInputProps,
+                  onSubmitEditing: ({ nativeEvent: { text } }) =>
+                    props.onSend({ text: text.trim() }, true),
+                  returnKeyType: "send",
+                  blurOnSubmit: false,
+                }}
                 containerStyle={{
                   // width: "80%",
                   flex: 1,
                   paddingHorizontal: 24,
                   paddingLeft: 27,
-                  backgroundColor: "#131612",
+                  backgroundColor: "#151515",
                   borderTopWidth: 0,
                 }}
               />
