@@ -184,7 +184,7 @@ const ChatComponent = () => {
 
         try {
           const response = await fetch(
-            "https://api.nofud.xyz:3001/openai/message",
+            "https://api.nofud.xyz/api/openai/message",
             // "http://192.168.1.151:3001/openai/message",
             {
               method: "POST",
