@@ -15,12 +15,15 @@ import {
   Bubble,
   InputToolbar,
   Time,
+  Message,
 } from "react-native-gifted-chat";
 import { MaterialIcons } from "@expo/vector-icons";
 import SendDisabled from "./assets/send-disabled.png";
 import Send from "./assets/send.png";
 import { addMessage, selectModel, selectMessages } from "./chatSlice";
 import io from "socket.io-client";
+
+const urlPattern = /(?:🔗\s*)?([^[\]]+)\]\(([^)]+)\)/g;
 
 const ChatComponent = () => {
   const { width } = Dimensions.get("window");
@@ -201,6 +204,9 @@ const ChatComponent = () => {
   );
 
   const renderBubble = (props) => {
+    const { currentMessage } = props;
+    const { text } = currentMessage;
+
     return (
       <Bubble
         {...props}
@@ -209,7 +215,7 @@ const ChatComponent = () => {
             backgroundColor: "#282D31CC",
             borderBottomLeftRadius: 0,
             marginBottom: 0,
-            maxWidth: "40%",
+            maxWidth: width > 475 ? "40%" : "70%",
           },
           right: {
             backgroundColor: props.currentMessage.image
@@ -217,7 +223,7 @@ const ChatComponent = () => {
               : "#1186FF",
             borderBottomRightRadius: props.currentMessage.image ? null : 0,
             marginBottom: 0,
-            maxWidth: "40%",
+            maxWidth: width > 475 ? "40%" : "70%",
           },
         }}
         textStyle={{
@@ -229,6 +235,14 @@ const ChatComponent = () => {
             color: "lightgrey",
           },
         }}
+        parsePatterns={(linkStyle) => [
+          {
+            type: "url",
+            style: { color: "#3B83F6", textDecorationLine: "underline" },
+            onPress: (url) => Linking.openURL(url),
+            pattern: /\[\[.*?\]\]\s*([^[\]]+)\]\(([^)]+)\)/g,
+          },
+        ]}
       />
     );
   };
@@ -296,6 +310,22 @@ const ChatComponent = () => {
     }, randomDelay);
   };
 
+  const renderMessage = (props) => {
+    return (
+      <Message
+        {...props}
+        linkStyle={{
+          right: {
+            color: "pink",
+          },
+          left: {
+            color: "orange",
+          },
+        }}
+      />
+    );
+  };
+
   return (
     <>
       <View style={chatContainerStyle}>
@@ -303,6 +333,7 @@ const ChatComponent = () => {
           renderAvatar={null}
           renderTime={renderTime}
           messageContainerRef={chatRef}
+          renderMessage={this.renderMessage}
           infiniteScroll
           bottomOffset={100}
           renderAvatarOnTop
