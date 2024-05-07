@@ -29,7 +29,7 @@ const ChatComponent = () => {
   const { width } = Dimensions.get("window");
   const chatContainerStyle = {
     flex: 1,
-    paddingHorizontal: width > 768 ? 350 : 0,
+    //paddingHorizontal: width > 768 ? 350 : 0,
   };
   const chatRef = useRef(null);
   const dispatch = useDispatch();
