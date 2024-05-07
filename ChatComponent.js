@@ -170,7 +170,7 @@ const ChatComponent = () => {
           console.log(socketRef.current.id);
           const response = await fetch(
             // "http://192.168.1.151:3001/api/openai/message",
-            "https://api.nofud.xyz/openai/message",
+            "https://api.nofud.xyz/api/openai/message",
             {
               method: "POST",
               headers: {
