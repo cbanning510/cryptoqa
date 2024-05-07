@@ -20,7 +20,7 @@ const Header = () => {
       </View>
       <TouchableOpacity
         onPress={() => {
-          const url = "https://www.telegram.com";
+          const url = "tg://join?invite=JQ8uKj8Wybs4OGM0";
           Linking.canOpenURL(url)
             .then((supported) => {
               if (supported) {
