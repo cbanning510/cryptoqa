@@ -14,27 +14,19 @@ import {
   GiftedChat,
   Bubble,
   InputToolbar,
-  // MessageImage,
   Time,
 } from "react-native-gifted-chat";
 import { MaterialIcons } from "@expo/vector-icons";
 import SendDisabled from "./assets/send-disabled.png";
 import Send from "./assets/send.png";
-import {
-  addMessage,
-  // setPresentLocation,
-  selectModel,
-  selectMessages,
-} from "./chatSlice";
+import { addMessage, selectModel, selectMessages } from "./chatSlice";
+import io from "socket.io-client";
 
 const ChatComponent = () => {
-  const { width } = Dimensions.get("window"); // Get the screen width
-  //   console.log("Dimensions are: ", Dimensions.get("window"));
-  console.log("Width is: ", width); // Log the width to the console
+  const { width } = Dimensions.get("window");
   const chatContainerStyle = {
     flex: 1,
-    // backgroundColor: "#fff",
-    paddingHorizontal: width > 768 ? 350 : 0, // Use the width directly here
+    paddingHorizontal: width > 768 ? 350 : 0,
   };
   const chatRef = useRef(null);
   const dispatch = useDispatch();
@@ -54,9 +46,59 @@ const ChatComponent = () => {
   const globalMessages = useSelector(selectMessages);
   const [contextText, setContextText] = useState("");
   const currentModel = model || "gpt-3.5-turbo-1106";
+  const socketRef = useRef(null);
+  const [accumulatedMessage, setAccumulatedMessage] = useState("");
 
   useEffect(() => {
-    // hack to deal with intiial message not showing on web
+    // const socket = io("http://localhost:3001");
+    const socket = io("https://api.nofud.xyz");
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      console.log("Connected to server!!!!!!!");
+    });
+
+    socket.on("message", (data) => {
+      if (data.clientId === socketRef.current.id) {
+        setAccumulatedMessage((prevMessage) => prevMessage + data.text);
+      }
+    });
+
+    socket.on("streamEnd", (data) => {
+      console.log("Message received", data);
+      console.log("Socket id is: ", socketRef.current.id);
+      console.log("data.clientId id is: ", data.clientId);
+      if (data.clientId === socketRef.current.id) {
+        setAccumulatedMessage((prevMessage) => {
+          console.log("accumulatedMessage: ", prevMessage);
+          const cleanedMessage = extractMessagesAndRemoveBrackets(
+            prevMessage.trim()
+          );
+          const botMessage = {
+            _id: Math.round(Math.random() * 1000000).toString(),
+            text: cleanedMessage,
+            createdAt: new Date().getTime(),
+            user: {
+              _id: "2",
+              name: "Bot",
+            },
+          };
+          console.log("Bot message is: ", botMessage);
+          dispatchMessageWithDelay(botMessage);
+
+          setIsLoading(false);
+
+          return "";
+        });
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
     if (Platform.OS === "web") {
       const gcLoadingContaineEl = document.querySelectorAll(
         '[data-testid="GC_LOADING_CONTAINER"]'
@@ -68,7 +110,6 @@ const ChatComponent = () => {
         }, 50);
       }
     }
-    // console.log("ChatComponent mounted", messages);
   }, []);
 
   useEffect(() => {
@@ -77,17 +118,13 @@ const ChatComponent = () => {
         '[data-testid="GC_LOADING_CONTAINER"]'
       );
       if (gcLoadingContainerEl) {
-        // Remove existing event listeners that could be causing issues
-        // This assumes you know the type of event, e.g., 'touchstart', 'wheel'
         gcLoadingContainerEl.removeEventListener(
           "touchstart",
           handleTouchStart,
           { passive: true }
         );
 
-        // Reattach the event listener with passive set to false
         const handleTouchStart = (event) => {
-          // your event handling logic here
           console.log("Handling touch start");
         };
 
@@ -98,44 +135,10 @@ const ChatComponent = () => {
     }
   }, []);
 
-  async function extractContentWithFourBrackets(text) {
-    const pattern = /(\[\[\[\[.*?\]\]\]\])/gs;
-    let result = [];
-
-    function generateUniqueId() {
-      return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    }
-
-    let match;
-    while ((match = pattern.exec(text)) !== null) {
-      if (match.index === pattern.lastIndex) {
-        pattern.lastIndex++;
-      }
-
-      result.push({ id: generateUniqueId(), content: match[1] });
-    }
-
-    try {
-      const existingDataString = await AsyncStorage.getItem("extractedPlan");
-      let existingData = [];
-
-      if (existingDataString) {
-        existingData = JSON.parse(existingDataString);
-      }
-
-      existingData = existingData.concat(result);
-
-      await AsyncStorage.setItem("extractedPlan", JSON.stringify(existingData));
-
-      const storedData = await AsyncStorage.getItem("extractedPlan");
-      // console.log("Updated data in storage is: \n\n", storedData);
-      refreshPlan();
-    } catch (error) {
-      console.error("Error updating AsyncStorage:", error);
-    }
-
-    return result;
-  }
+  const resetStates = () => {
+    setIsLoading(false);
+    setContextText("");
+  };
 
   function extractMessagesAndRemoveBrackets(text) {
     console.log("Extracting messages and removing brackets", text);
@@ -147,21 +150,6 @@ const ChatComponent = () => {
 
     return cleanedText.trim(); // Add .trim() to remove leading/trailing whitespace
   }
-
-  //   const onSend = useCallback((newMessages = []) => {
-  //     setMessages((previousMessages) =>
-  //       GiftedChat.append(previousMessages, newMessages)
-  //     );
-  //     // Here, you can send the newMessages to your backend API
-  //     // and handle the response from ChatGPT
-  //   }, []);
-
-  const resetStates = () => {
-    setIsLoading(false);
-    // setImageUri(""); // Ensure this is the correct place to reset
-    // setPublicUri(""); // Reset here to ensure it's cleared after sending
-    setContextText("");
-  };
 
   const onSend = useCallback(
     async (newMessages) => {
@@ -177,15 +165,12 @@ const ChatComponent = () => {
           createdAt: userMessageCreatedAt,
         };
         dispatch(addMessage(userMessage));
-        // chatRef.current?.scrollToOffset({
-        //   offset: 0,
-        //   animated: true,
-        // });
 
         try {
+          console.log(socketRef.current.id);
           const response = await fetch(
-            "https://api.nofud.xyz/api/openai/message",
             // "http://192.168.1.151:3001/api/openai/message",
+            "https://api.nofud.xyz/openai/message",
             {
               method: "POST",
               headers: {
@@ -193,35 +178,17 @@ const ChatComponent = () => {
               },
               body: JSON.stringify({
                 userInput: userMessage.text,
-                //lat: location?.coords.latitude,
-                //long: location?.coords.longitude,
-                //dateTime: userMessage.createdAt,
                 model: currentModel,
+                clientId: socketRef.current.id,
               }),
             }
           );
+          console.log("Response is: ", response);
 
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
 
-          const data = await response.json();
-
-          const botMessage = {
-            _id: Math.round(Math.random() * 1000000).toString(),
-            text: extractMessagesAndRemoveBrackets(data.response.trim()),
-            createdAt: new Date().getTime(),
-            user: {
-              _id: "2",
-              name: "Bot",
-            },
-          };
-          //   dispatch(addMessage(botMessage));
-          dispatchMessageWithDelay(botMessage);
-          //   chatRef.current?.scrollToOffset({
-          //     offset: 0,
-          //     animated: true,
-          //   });
           resetStates();
         } catch (error) {
           console.error("Error:", error);
@@ -233,20 +200,6 @@ const ChatComponent = () => {
     [dispatch, currentModel]
   );
 
-  //   function parseAndCleanInput(data) {
-  //     const modifiedData = data.map((item) => {
-  //       // Check if the text property exists and is not null/undefined
-  //       if (item.text) {
-  //         // If text exists, replace the patterns as before
-  //         item.text = item.text.replace(/\[\[.*?\]\]/g, "").trim();
-  //       }
-  //       // Return the item whether it was modified or not
-  //       return item;
-  //     });
-
-  //     return modifiedData;
-  //   }
-
   const renderBubble = (props) => {
     return (
       <Bubble
@@ -255,16 +208,15 @@ const ChatComponent = () => {
           left: {
             backgroundColor: "#282D31CC",
             borderBottomLeftRadius: 0,
-            marginBottom: 0, // Add space below each left bubble
+            marginBottom: 0,
             maxWidth: "40%",
           },
           right: {
             backgroundColor: props.currentMessage.image
-              ? // ? "#282D31CC"
-                "transparent"
+              ? "transparent"
               : "#1186FF",
             borderBottomRightRadius: props.currentMessage.image ? null : 0,
-            marginBottom: 0, // Add space below each right bubble
+            marginBottom: 0,
             maxWidth: "40%",
           },
         }}
@@ -275,7 +227,6 @@ const ChatComponent = () => {
         timeTextStyle={{
           right: {
             color: "lightgrey",
-            // color: "white",
           },
         }}
       />
@@ -287,27 +238,21 @@ const ChatComponent = () => {
     const regex = /^(.+?(?:\n|$))/gm;
     const textWithoutBrackets = botResponseText.text.replace(/\{.*?\}/g, "");
     const sentences = textWithoutBrackets.match(regex) || [];
-    // const sentences = textWithoutBrackets.match(/[^.!?]+[.!?]*/g) || [];
 
-    let cumulativeDelay = 0; // Initialize cumulative delay
+    let cumulativeDelay = 0;
 
     sentences.forEach((sentence, index) => {
       const trimmedSentence = sentence.trim();
       const words = trimmedSentence.split(/\s+/).length;
 
-      // Calculate delay based on sentence length, assuming ~200-250 WPM for reading or 40 WPM for typing
-      // 1 word = 1.5 seconds / 40 (for typing speed)
-      const delayPerWord = 1500 / 40; // Adjust this value as needed
+      const delayPerWord = 1500 / 40;
       const sentenceDelay = words * delayPerWord;
 
-      // Adjust base delay here if needed to ensure a minimum visibility time for shorter sentences
-      const baseDelay = 500; // Base delay to add between sentences
+      const baseDelay = 500;
 
-      // Calculate total delay for this sentence
       const totalDelay = baseDelay + sentenceDelay;
 
       setTimeout(() => {
-        // Dispatch the sentence here
         const message = {
           _id: `${Date.now()}-${index}`,
           createdAt: new Date().getTime(),
@@ -316,31 +261,21 @@ const ChatComponent = () => {
         };
 
         dispatch(addMessage(message));
-        // chatRef.current?.scrollToOffset({
-        //   offset: 0,
-        //   animated: true,
-        // });
-        // messageReceivedSound.play();
 
-        // Optionally set loading to false after the last message
         if (index === sentences.length - 1) {
           setIsLoading(false);
         }
       }, cumulativeDelay);
 
-      // Update cumulative delay for the next sentence
       cumulativeDelay += totalDelay;
     });
   }
 
   const renderTime = (props) => {
-    // Check if the current message has an image
     if (props.currentMessage.image) {
-      // Return null to not render the time for image messages
       return null;
     }
 
-    // For all other messages, return the default Time component
     return (
       <View style={{ marginHorizontal: 10 }}>
         <Time {...props} />
@@ -349,22 +284,17 @@ const ChatComponent = () => {
   };
 
   const randomizeSetIsLoading = () => {
-    // Define the minimum and maximum delay times in milliseconds
-    const minDelay = 1500; // 1 second
-    const maxDelay = 3000; // 5 seconds
+    const minDelay = 1500;
+    const maxDelay = 3000;
 
-    // Generate a random delay within the specified range
     const randomDelay = Math.floor(
       Math.random() * (maxDelay - minDelay + 1) + minDelay
     );
 
-    // Set `setIsLoading` to true after the random delay
     setTimeout(() => {
       setIsLoading(true);
     }, randomDelay);
   };
-
-  //   renderFooter: () => (chatRecipientIsTyping ? <TypingIndicator /> : null);
 
   return (
     <>
@@ -372,13 +302,10 @@ const ChatComponent = () => {
         <GiftedChat
           renderAvatar={null}
           renderTime={renderTime}
-          // renderFooter={() => (isLoading ? <TypingIndicator /> : null)}
           messageContainerRef={chatRef}
           infiniteScroll
-          // loadEarlier
           bottomOffset={100}
           renderAvatarOnTop
-          // messages={parseAndCleanInput(globalMessages)}
           messages={globalMessages}
           onSend={(newMessages) => onSend(newMessages)}
           renderBubble={renderBubble}
@@ -391,7 +318,6 @@ const ChatComponent = () => {
           }}
           inverted={false}
           isTyping={isLoading}
-          // isTyping={true}
           renderActions={() => (
             <TouchableOpacity
               style={{
@@ -399,7 +325,6 @@ const ChatComponent = () => {
                 marginTop: 8,
                 alignSelf: "center",
               }}
-              // onPress={handleImagePicker}
               onPress={() => {
                 const url = "https://www.google.com";
                 Linking.canOpenURL(url)
@@ -451,7 +376,6 @@ const ChatComponent = () => {
               flex: 1,
               alignSelf: "center",
               marginTop: 8,
-              //width: "64%",
               height: 48,
               borderColor: "#202428",
               borderWidth: 2,
@@ -460,7 +384,6 @@ const ChatComponent = () => {
               paddingLeft: 20,
               fontSize: 15,
               color: "rgba(255, 255, 255, 0.6)",
-              //fontFamily: "SF Pro Text",
               backgroundColor: "#151515",
             },
             placeholder: "Message...",
@@ -478,7 +401,6 @@ const ChatComponent = () => {
                   blurOnSubmit: false,
                 }}
                 containerStyle={{
-                  // width: "80%",
                   flex: 1,
                   paddingHorizontal: 24,
                   paddingLeft: 27,
@@ -493,15 +415,5 @@ const ChatComponent = () => {
     </>
   );
 };
-
-// const styles = StyleSheet.create({
-//   chatContainer: {
-//     flex: 1,
-//     backgroundColor: "#fff",
-//     // Apply padding conditionally based on the screen width
-//     paddingHorizontal: width > 768 ? 150 : 10,
-//   },
-//   // Other styles...
-// });
 
 export default ChatComponent;
