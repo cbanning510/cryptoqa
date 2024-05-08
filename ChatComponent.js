@@ -215,7 +215,7 @@ const ChatComponent = () => {
             backgroundColor: "#282D31CC",
             borderBottomLeftRadius: 0,
             marginBottom: 0,
-            maxWidth: width > 475 ? "40%" : "70%",
+            maxWidth: width > 475 ? "46%" : "70%",
           },
           right: {
             backgroundColor: props.currentMessage.image
@@ -223,7 +223,7 @@ const ChatComponent = () => {
               : "#1186FF",
             borderBottomRightRadius: props.currentMessage.image ? null : 0,
             marginBottom: 0,
-            maxWidth: width > 475 ? "40%" : "70%",
+            maxWidth: width > 475 ? "46%" : "70%",
           },
         }}
         textStyle={{
