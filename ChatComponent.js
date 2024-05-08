@@ -29,7 +29,7 @@ const ChatComponent = () => {
   const { width } = Dimensions.get("window");
   const chatContainerStyle = {
     flex: 1,
-    paddingHorizontal: width > 768 ? 350 : 0,
+    paddingHorizontal: width > 1024 ? 300 : 0,
   };
   const chatRef = useRef(null);
   const dispatch = useDispatch();
@@ -215,7 +215,8 @@ const ChatComponent = () => {
             backgroundColor: "#282D31CC",
             borderBottomLeftRadius: 0,
             marginBottom: 0,
-            maxWidth: width > 475 ? "46%" : "70%",
+            // Adjust maxWidth based on device width
+            maxWidth: width > 1024 ? "40%" : "70%",
           },
           right: {
             backgroundColor: props.currentMessage.image
@@ -223,7 +224,8 @@ const ChatComponent = () => {
               : "#1186FF",
             borderBottomRightRadius: props.currentMessage.image ? null : 0,
             marginBottom: 0,
-            maxWidth: width > 475 ? "46%" : "70%",
+            // Adjust maxWidth based on device width
+            maxWidth: width > 1024 ? "40%" : "70%",
           },
         }}
         textStyle={{
