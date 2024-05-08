@@ -7,7 +7,7 @@ import {
   Image,
 } from "react-native";
 import Avatar from "./Avatar";
-import Pepe from "./assets/hero-image.png";
+import Pepe from "./assets/newPepi.png";
 
 const Header = () => {
   // const avatarUri = "./assets/hero-image.png";
@@ -15,7 +15,10 @@ const Header = () => {
   return (
     <View style={styles.header}>
       <View style={styles.leftHeaderContainer}>
-        <Image source={Pepe} style={{ width: 30, height: 30 }} />
+        <Image
+          source={Pepe}
+          style={{ width: 30, height: 30, borderRadius: "50%" }}
+        />
         <Text style={styles.headerText}>PEPi Support</Text>
       </View>
       <TouchableOpacity
